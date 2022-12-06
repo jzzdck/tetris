@@ -19,7 +19,7 @@ Grid::Grid (sf::Vector2f start_pos, sf::Vector2f size, sf::Vector2u dim) :
 
 void Grid::Update ( ) {
 	int lines_cleared = 0;
-	for(int i=m_dims.y-1;i>=0;i--) { 
+	for(int i=0;i<m_dims.y;i++) { 
 		float y_pos = GetPosition({0,i}).y;
 		int cols_occupied = std::count_if(m_occupied.begin(),m_occupied.end(),
 										  [&](const sf::RectangleShape &rect) {
@@ -33,7 +33,7 @@ void Grid::Update ( ) {
 	}
 	
 	int prev_score = m_score;
-	m_score += lines_cleared * lines_cleared * 31 * 17 * 13;
+	m_score += lines_cleared * lines_cleared * 17 * 13;
 	if (m_score != prev_score) std::cout << "SCORE: " << m_score << std::endl;
 }
 
