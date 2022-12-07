@@ -26,10 +26,15 @@ public:
 	
 	inline static sf::Color colors[3] = { sf::Color::Red, sf::Color::Magenta, sf::Color::Blue };
 private:
+	std::vector<sf::Vector2i> getRotatedAndTranslatedShape() const;
+	std::vector<sf::Vector2i> getRotatedShape() const;
+	std::vector<sf::Vector2i> getTranslatedShape() const;
+	std::vector<sf::Vector2i> getDescendedShape() const;
 	void setPosition(Grid *grid);
 	void setupBlock(int which, const sf::Color & c, const sf::Vector2f & s);
 	
 	bool m_done;
+	int m_waitime;
 	int m_speed;
 	Tetromino::Direction m_dir;
 	Tetromino::Rotation m_rot;

@@ -54,7 +54,7 @@ void Grid::clearRow ( int which ) {
 	m_occupied.erase(it, m_occupied.end());
 }
 
-void Grid::AddRectangles (const std::vector<sf::RectangleShape> & to_add, const std::vector<sf::Vector2i> & gridpos) {
+void Grid::AddRectangles (const std::vector<sf::RectangleShape> & to_add) {
 	for(size_t i=0;i<to_add.size();i++) { 
 		m_occupied.push_back(to_add[i]);
 	}
@@ -91,5 +91,15 @@ void Grid::descendBlocks (int from) {
 		if (pos.y > from * m_blocksize.y + m_origin.y) continue;
 		rect->setPosition(sf::Vector2f(pos.x, pos.y + m_blocksize.y));
 	}
+}
+
+bool Grid::AssertValidShape (const std::vector<sf::Vector2i> & shape) {
+	for(size_t i=0;i<shape.size();i++) { 
+		if (!this->AssertValidCol(shape[i])) {
+			return false;
+		}
+	}
+	
+	return true;
 }
 

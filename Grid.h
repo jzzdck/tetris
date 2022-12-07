@@ -10,13 +10,14 @@ public:
 	Grid();
 	Grid(sf::Vector2f start_pos, sf::Vector2f size, sf::Vector2u dim);
 	void Update();
-	void AddRectangles(const std::vector<sf::RectangleShape> &to_add, const std::vector<sf::Vector2i> &gridpos);
+	void AddRectangles(const std::vector<sf::RectangleShape> &to_add);
 	void Draw(sf::RenderWindow * window) const;
 	const sf::Vector2f & GetBlocksize();
 	sf::Vector2f GetPosition(const sf::Vector2i & gridpos) const;
+	bool AssertValidShape(const std::vector<sf::Vector2i> &shape);
+private:
 	bool AssertValidPosition(const sf::Vector2i & gridpos) const;
 	bool AssertValidCol(const sf::Vector2i & gridpos) const;
-private:
 	void descendBlocks(int from);
 	void clearRow(int which);
 	int m_score;

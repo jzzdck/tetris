@@ -2,49 +2,31 @@
 #include <stdexcept>
 
 void Tetromino::Update (Grid * grid) {
-	auto origin = m_gridpos[1];
-	std::vector<sf::Vector2i> new_pos = m_gridpos;
+	std::vector<sf::Vector2i> RT = this->getRotatedAndTranslatedShape();
+	std::vector<sf::Vector2i> T = this->getRotatedAndTranslatedShape();
+	std::vector<sf::Vector2i> R = this->getRotatedAndTranslatedShape();
+	std::vector<sf::Vector2i> D = this->getDescendedShape();
 	
-	for(int i=0;i<m_gridpos.size();i++) { 
-		if (m_rot != Tetromino::Rotation::Zero) {
-			new_pos[i] -= origin;
-			new_pos[i] = sf::Vector2i{ -new_pos[i].y, new_pos[i].x };
-			if (m_rot == Tetromino::Rotation::CW) new_pos[i] *= -1;
-			new_pos[i] += origin;
-		}
-		
-		// si la rotacion me vuelve invalida la posicion, deshacerla
-		if (!grid->AssertValidCol(new_pos[i])) {
-			new_pos = m_gridpos;
-			m_rot = Tetromino::Rotation::Zero;
-		}
-		
-		// si mover el tetromino invalida la posicion, deshacer el movimiento
-		new_pos[i].x += m_dir;
-		if (!grid->AssertValidCol(new_pos[i])) {
-			for(int j=0;j<=i;j++) { 
-				new_pos[j].x -= m_dir;
-			}
-			m_dir = Tetromino::Direction::None;
-		}
-		
-		// si la caida me vuelve invalida la posicion, 
-		// es porque choco contra un tetromino o el piso,
-		// entonces hay que frenar el tetromino
-		new_pos[i].y += 1;
-		if (!grid->AssertValidPosition(new_pos[i])) {
-			m_done = true;
-			break;
-		}
+	if (grid->AssertValidShape(RT)) {
+		m_gridpos = RT;
+	} else if (grid->AssertValidShape(R)) {
+		m_gridpos = T;
+	} else if (grid->AssertValidShape(T)) {
+		m_gridpos = T;
+	} else if (grid->AssertValidShape(D)) {
+		m_gridpos = D;
+	} else {
+		--m_waitime;
+		m_speed = 0;
 	}
 	
-	m_dir = Tetromino::Direction::None;
-	m_rot = Tetromino::Rotation::Zero;
-	if (!m_done) {
-		m_gridpos = new_pos;
+	if (m_waitime) {
+		m_dir = Tetromino::Direction::None;
+		m_rot = Tetromino::Rotation::Zero;
 		this->setPosition(grid);
 	} else {
-		grid->AddRectangles(m_model,m_gridpos);
+		m_done = true;
+		grid->AddRectangles(m_model);
 	}
 }
 
@@ -57,7 +39,7 @@ void Tetromino::HandleInput ( ) {
 }
 
 Tetromino::Tetromino (const std::string & shape, sf::Vector2i start_pos, sf::Vector2f blocksize) : 
-	m_speed(0), m_thickness(4.f), m_done(false),
+	m_speed(0), m_thickness(4.f), m_done(false), m_waitime(5),
 	m_rot(Tetromino::Rotation::Zero),
 	m_dir(Tetromino::Direction::None)
 {
@@ -115,5 +97,65 @@ void Tetromino::Move (Tetromino::Direction where) {
 
 bool Tetromino::IsDone ( ) const {
 	return m_done;
+}
+
+std::vector<sf::Vector2i> Tetromino::getRotatedShape ( ) const {
+	std::vector<sf::Vector2i> new_pos = m_gridpos;
+	auto origin = m_gridpos[0];
+	
+	for(size_t i=0;i<m_gridpos.size();i++) { 
+		if (m_rot != Tetromino::Rotation::Zero) {
+			new_pos[i] -= origin;
+			new_pos[i] = sf::Vector2i{ -new_pos[i].y, new_pos[i].x };
+			if (m_rot == Tetromino::Rotation::CW) new_pos[i] *= -1;
+			new_pos[i] += origin;
+		}
+		
+		new_pos[i].y += m_speed;
+	}
+	
+	return new_pos;
+}
+
+std::vector<sf::Vector2i> Tetromino::getTranslatedShape ( ) const {
+	std::vector<sf::Vector2i> new_pos = m_gridpos;
+	auto origin = m_gridpos[0];
+	
+	for(size_t i=0;i<m_gridpos.size();i++) {
+		new_pos[i].x += m_dir;
+		new_pos[i].y += m_speed;
+	}
+	
+	return new_pos;
+}
+
+std::vector<sf::Vector2i> Tetromino::getRotatedAndTranslatedShape ( ) const {
+	std::vector<sf::Vector2i> new_pos = m_gridpos;
+	auto origin = m_gridpos[0];
+	
+	for(size_t i=0;i<m_gridpos.size();i++) { 
+		if (m_rot != Tetromino::Rotation::Zero) {
+			new_pos[i] -= origin;
+			new_pos[i] = sf::Vector2i{ -new_pos[i].y, new_pos[i].x };
+			if (m_rot == Tetromino::Rotation::CW) new_pos[i] *= -1;
+			new_pos[i] += origin;
+		}
+		
+		new_pos[i].x += m_dir;
+		new_pos[i].y += m_speed;
+	}
+	
+	return new_pos;
+}
+
+std::vector<sf::Vector2i> Tetromino::getDescendedShape ( ) const {
+	std::vector<sf::Vector2i> new_pos = m_gridpos;
+	auto origin = m_gridpos[0];
+	
+	for(size_t i=0;i<m_gridpos.size();i++) { 
+		new_pos[i].y += m_speed;
+	}
+	
+	return new_pos;
 }
 
