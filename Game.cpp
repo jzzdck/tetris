@@ -52,7 +52,7 @@ void Game::handleInput ( ) {
 }
 
 void Game::update ( ) {
-	float update_ps = 1.f / (m_tetromino->GetSpeed() * m_frametime);
+	float update_ps = 1.f / (m_frametime);
 	
 	if (m_elapsed.asSeconds() >= update_ps) {
 		if (m_tetromino->IsDone()) {

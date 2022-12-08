@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 void Tetromino::Update (Grid * grid) {
+	if (m_done) --m_waitime;
 	std::vector<sf::Vector2i> RT = this->getRotatedAndTranslatedShape();
 	std::vector<sf::Vector2i> T = this->getRotatedAndTranslatedShape();
 	std::vector<sf::Vector2i> R = this->getRotatedAndTranslatedShape();
@@ -9,14 +10,22 @@ void Tetromino::Update (Grid * grid) {
 	
 	if (grid->AssertValidShape(RT)) {
 		m_gridpos = RT;
+		m_speed = 1;
+		m_done = false;
 	} else if (grid->AssertValidShape(R)) {
-		m_gridpos = T;
+		m_gridpos = R;
+		m_speed = 1;
+		m_done = false;
 	} else if (grid->AssertValidShape(T)) {
 		m_gridpos = T;
+		m_speed = 1;
+		m_done = false;
 	} else if (grid->AssertValidShape(D)) {
 		m_gridpos = D;
+		m_speed = 1;
+		m_done = false;
 	} else {
-		--m_waitime;
+		m_done = true;
 		m_speed = 0;
 	}
 	
@@ -25,21 +34,18 @@ void Tetromino::Update (Grid * grid) {
 		m_rot = Tetromino::Rotation::Zero;
 		this->setPosition(grid);
 	} else {
-		m_done = true;
 		grid->AddRectangles(m_model);
 	}
 }
 
 void Tetromino::HandleInput ( ) {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
-		m_speed = 2;
-	} else {
-		m_speed = 1;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) and m_speed < 2) {
+		m_speed *= 2;
 	}
 }
 
 Tetromino::Tetromino (const std::string & shape, sf::Vector2i start_pos, sf::Vector2f blocksize) : 
-	m_speed(0), m_thickness(4.f), m_done(false), m_waitime(5),
+	m_speed(1), m_thickness(4.f), m_done(false), m_waitime(2),
 	m_rot(Tetromino::Rotation::Zero),
 	m_dir(Tetromino::Direction::None)
 {
@@ -96,7 +102,7 @@ void Tetromino::Move (Tetromino::Direction where) {
 }
 
 bool Tetromino::IsDone ( ) const {
-	return m_done;
+	return !m_waitime;
 }
 
 std::vector<sf::Vector2i> Tetromino::getRotatedShape ( ) const {
