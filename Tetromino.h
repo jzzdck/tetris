@@ -8,11 +8,12 @@
 #include "Grid.h"
 #include <vector>
 #include <SFML/Window/Event.hpp>
+using Shape = std::vector<sf::Vector2i>;
 
 class Tetromino {
 public:
 	enum Direction { None=0, Right=1, Left=-1 };
-	enum Rotation { Zero, CW, CCW };
+	enum Rotation { Zero=0, CW=1, CCW=-1 };
 	
 	Tetromino() = delete;
 	Tetromino(const std::string & shape, sf::Vector2i start_pos, sf::Vector2f blocksize);
@@ -23,22 +24,21 @@ public:
 	void Rotate(Tetromino::Rotation how);
 	void Move(Tetromino::Direction where);
 	int GetSpeed() { return m_speed; }
+	void HardDrop();
 	
 	inline static sf::Color colors[3] = { sf::Color::Red, sf::Color::Magenta, sf::Color::Blue };
 private:
-	std::vector<sf::Vector2i> getRotatedAndTranslatedShape() const;
-	std::vector<sf::Vector2i> getRotatedShape() const;
-	std::vector<sf::Vector2i> getTranslatedShape() const;
-	std::vector<sf::Vector2i> getDescendedShape() const;
+	bool lowerThan(const Shape & another) const;
+	Shape transformShape() const;
 	void setPosition(Grid *grid);
 	void setupBlock(int which, const sf::Color & c, const sf::Vector2f & s);
 	
-	bool m_done;
+	bool m_hardrop;
 	int m_waitime;
 	int m_speed;
 	Tetromino::Direction m_dir;
 	Tetromino::Rotation m_rot;
-	std::vector<sf::Vector2i> m_gridpos;
+	Shape m_gridpos, m_origpos;
 	std::vector<sf::RectangleShape> m_model;
 	float m_thickness;
 };

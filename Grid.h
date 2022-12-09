@@ -4,6 +4,7 @@
 #include <vector>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+using Shape = std::vector<sf::Vector2i>;
 
 class Grid {
 public:
@@ -14,10 +15,11 @@ public:
 	void Draw(sf::RenderWindow * window) const;
 	const sf::Vector2f & GetBlocksize();
 	sf::Vector2f GetPosition(const sf::Vector2i & gridpos) const;
-	bool AssertValidShape(const std::vector<sf::Vector2i> &shape);
+	Shape GetGhostShape(const Shape &shape) const;
+	Shape GetBoundedShape(const Shape &shape) const;
+	bool assertValidShape(const Shape &shape) const;
 private:
-	bool AssertValidPosition(const sf::Vector2i & gridpos) const;
-	bool AssertValidCol(const sf::Vector2i & gridpos) const;
+	bool assertValidCol(const sf::Vector2i & gridpos) const;
 	void descendBlocks(int from);
 	void clearRow(int which);
 	int m_score;

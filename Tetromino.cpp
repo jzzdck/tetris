@@ -1,51 +1,9 @@
 #include "Tetromino.h"
 #include <stdexcept>
-
-void Tetromino::Update (Grid * grid) {
-	if (m_done) --m_waitime;
-	std::vector<sf::Vector2i> RT = this->getRotatedAndTranslatedShape();
-	std::vector<sf::Vector2i> T = this->getRotatedAndTranslatedShape();
-	std::vector<sf::Vector2i> R = this->getRotatedAndTranslatedShape();
-	std::vector<sf::Vector2i> D = this->getDescendedShape();
-	
-	if (grid->AssertValidShape(RT)) {
-		m_gridpos = RT;
-		m_speed = 1;
-		m_done = false;
-	} else if (grid->AssertValidShape(R)) {
-		m_gridpos = R;
-		m_speed = 1;
-		m_done = false;
-	} else if (grid->AssertValidShape(T)) {
-		m_gridpos = T;
-		m_speed = 1;
-		m_done = false;
-	} else if (grid->AssertValidShape(D)) {
-		m_gridpos = D;
-		m_speed = 1;
-		m_done = false;
-	} else {
-		m_done = true;
-		m_speed = 0;
-	}
-	
-	if (m_waitime) {
-		m_dir = Tetromino::Direction::None;
-		m_rot = Tetromino::Rotation::Zero;
-		this->setPosition(grid);
-	} else {
-		grid->AddRectangles(m_model);
-	}
-}
-
-void Tetromino::HandleInput ( ) {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) and m_speed < 2) {
-		m_speed *= 2;
-	}
-}
+#include <algorithm>
 
 Tetromino::Tetromino (const std::string & shape, sf::Vector2i start_pos, sf::Vector2f blocksize) : 
-	m_speed(1), m_thickness(4.f), m_done(false), m_waitime(2),
+	m_speed(1), m_thickness(4.f), m_hardrop(false), m_waitime(5),
 	m_rot(Tetromino::Rotation::Zero),
 	m_dir(Tetromino::Direction::None)
 {
@@ -67,6 +25,31 @@ Tetromino::Tetromino (const std::string & shape, sf::Vector2i start_pos, sf::Vec
 		case 'L': --m_gridpos[i].x; break;
 		case 'E': ++m_gridpos[i].x, ++m_gridpos[i].y; break;
 		}
+	}
+}
+
+void Tetromino::Update (Grid * grid) {
+	Shape original = m_gridpos;
+	m_gridpos = grid->GetBoundedShape(this->transformShape());
+	Shape ghost = grid->GetGhostShape(m_gridpos);
+	
+	if (m_hardrop or this->lowerThan(ghost)) {
+		m_gridpos = grid->assertValidShape(ghost) ? ghost : original;
+		m_waitime = m_hardrop ? 0 : (--m_waitime);
+	} else { m_waitime = 5; }
+	
+	m_dir = Tetromino::Direction::None;
+	m_rot = Tetromino::Rotation::Zero;
+	this->setPosition(grid);
+	
+	if (!m_waitime) { grid->AddRectangles(m_model); }
+}
+
+void Tetromino::HandleInput ( ) {
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) and m_speed < 2) {
+		m_speed = 2;
+	} else {
+		m_speed = 1;
 	}
 }
 
@@ -105,7 +88,11 @@ bool Tetromino::IsDone ( ) const {
 	return !m_waitime;
 }
 
-std::vector<sf::Vector2i> Tetromino::getRotatedShape ( ) const {
+void Tetromino::HardDrop ( ) {
+	m_hardrop = true;
+}
+
+Shape Tetromino::transformShape ( ) const {
 	std::vector<sf::Vector2i> new_pos = m_gridpos;
 	auto origin = m_gridpos[0];
 	
@@ -113,37 +100,7 @@ std::vector<sf::Vector2i> Tetromino::getRotatedShape ( ) const {
 		if (m_rot != Tetromino::Rotation::Zero) {
 			new_pos[i] -= origin;
 			new_pos[i] = sf::Vector2i{ -new_pos[i].y, new_pos[i].x };
-			if (m_rot == Tetromino::Rotation::CW) new_pos[i] *= -1;
-			new_pos[i] += origin;
-		}
-		
-		new_pos[i].y += m_speed;
-	}
-	
-	return new_pos;
-}
-
-std::vector<sf::Vector2i> Tetromino::getTranslatedShape ( ) const {
-	std::vector<sf::Vector2i> new_pos = m_gridpos;
-	auto origin = m_gridpos[0];
-	
-	for(size_t i=0;i<m_gridpos.size();i++) {
-		new_pos[i].x += m_dir;
-		new_pos[i].y += m_speed;
-	}
-	
-	return new_pos;
-}
-
-std::vector<sf::Vector2i> Tetromino::getRotatedAndTranslatedShape ( ) const {
-	std::vector<sf::Vector2i> new_pos = m_gridpos;
-	auto origin = m_gridpos[0];
-	
-	for(size_t i=0;i<m_gridpos.size();i++) { 
-		if (m_rot != Tetromino::Rotation::Zero) {
-			new_pos[i] -= origin;
-			new_pos[i] = sf::Vector2i{ -new_pos[i].y, new_pos[i].x };
-			if (m_rot == Tetromino::Rotation::CW) new_pos[i] *= -1;
+			new_pos[i] *= (int)m_rot;
 			new_pos[i] += origin;
 		}
 		
@@ -154,14 +111,12 @@ std::vector<sf::Vector2i> Tetromino::getRotatedAndTranslatedShape ( ) const {
 	return new_pos;
 }
 
-std::vector<sf::Vector2i> Tetromino::getDescendedShape ( ) const {
-	std::vector<sf::Vector2i> new_pos = m_gridpos;
-	auto origin = m_gridpos[0];
-	
+bool Tetromino::lowerThan (const Shape & another) const {
 	for(size_t i=0;i<m_gridpos.size();i++) { 
-		new_pos[i].y += m_speed;
+		if (m_gridpos[i].y >= another[i].y) {
+			return true;
+		}
 	}
 	
-	return new_pos;
+	return false;
 }
-

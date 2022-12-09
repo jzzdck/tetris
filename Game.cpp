@@ -44,6 +44,8 @@ void Game::handleInput ( ) {
 				m_tetromino->Move(Tetromino::Direction::Left);
 			} else if (e.key.code == sf::Keyboard::Right) {
 				m_tetromino->Move(Tetromino::Direction::Right);
+			} else if (e.key.code == sf::Keyboard::LControl) {
+				m_tetromino->HardDrop();
 			}
 		}
 	}
@@ -52,7 +54,7 @@ void Game::handleInput ( ) {
 }
 
 void Game::update ( ) {
-	float update_ps = 1.f / (m_frametime);
+	float update_ps = 1.f / (m_tetromino->GetSpeed() * m_frametime);
 	
 	if (m_elapsed.asSeconds() >= update_ps) {
 		if (m_tetromino->IsDone()) {

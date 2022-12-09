@@ -2,10 +2,11 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <cstdlib>
 
 Grid::Grid() : 
 	Grid(sf::Vector2f{5.f,5.f}, sf::Vector2f{350.f,700.f}, sf::Vector2u{10,20})
-{
+{  
 	
 }
 
@@ -64,7 +65,11 @@ const sf::Vector2f & Grid::GetBlocksize ( ) {
 	return m_blocksize;
 }
 
-bool Grid::AssertValidPosition (const sf::Vector2i & gridpos) const {
+sf::Vector2f Grid::GetPosition (const sf::Vector2i & gridpos) const {
+	return { gridpos.x * m_blocksize.x + m_origin.x, gridpos.y * m_blocksize.y + m_origin.y};
+}
+
+bool Grid::assertValidCol (const sf::Vector2i & gridpos) const {
 	auto real_pos = this->GetPosition(gridpos);
 	auto is_occup = find_if(m_occupied.begin(),m_occupied.end(),
 							[&](const sf::RectangleShape &rect) {
@@ -72,17 +77,8 @@ bool Grid::AssertValidPosition (const sf::Vector2i & gridpos) const {
 							});
 	
 	bool not_occupied = ( is_occup == m_occupied.end() );
-	return (not_occupied and real_pos.y < GetPosition(m_dims).y);
-}
-
-sf::Vector2f Grid::GetPosition (const sf::Vector2i & gridpos) const {
-	return { gridpos.x * m_blocksize.x + m_origin.x, gridpos.y * m_blocksize.y + m_origin.y};
-}
-
-bool Grid::AssertValidCol (const sf::Vector2i & gridpos) const {
-	auto real_pos = GetPosition(gridpos);
-	bool in_range = ( real_pos.x >= GetPosition({0,0}).x && real_pos.x < GetPosition(m_dims).x );
-	return this->AssertValidPosition(gridpos) && in_range;
+	bool in_range = ( real_pos.x >= GetPosition({0,0}).x  and real_pos.y < GetPosition(m_dims).y );
+	return (not_occupied and in_range);
 }
 
 void Grid::descendBlocks (int from) {
@@ -93,13 +89,50 @@ void Grid::descendBlocks (int from) {
 	}
 }
 
-bool Grid::AssertValidShape (const std::vector<sf::Vector2i> & shape) {
+bool Grid::assertValidShape (const Shape & shape) const {
 	for(size_t i=0;i<shape.size();i++) { 
-		if (!this->AssertValidCol(shape[i])) {
+		if (!this->assertValidCol(shape[i])) {
 			return false;
 		}
 	}
 	
 	return true;
+}
+
+Shape Grid::GetGhostShape (const Shape & shape) const {
+	Shape ghost_shape = shape;
+	
+	while (assertValidShape(ghost_shape)) {
+		for(size_t i=0;i<ghost_shape.size();i++) { 
+			++ghost_shape[i].y;
+		}
+	}
+	
+	for(size_t i=0;i<ghost_shape.size();i++) { 
+		--ghost_shape[i].y;
+	}
+	
+	return ghost_shape;
+}
+
+Shape Grid::GetBoundedShape (const Shape & shape) const {
+	Shape ghost_shape = shape;
+	int x_dif = 0;
+	for(size_t i=0;i<ghost_shape.size();i++) { 
+		int adif = m_dims.x - ghost_shape[i].x;
+		if (adif <= 0) {
+			x_dif = std::min(adif-1,x_dif);
+		} else if (adif > m_dims.x) {
+			x_dif = std::max(adif - m_dims.x,x_dif);
+		}
+	}
+	
+	if (x_dif != 0) {
+		for(size_t i=0;i<ghost_shape.size();i++) { 
+			ghost_shape[i].x += x_dif;
+		}
+	}
+	
+	return ghost_shape;
 }
 
