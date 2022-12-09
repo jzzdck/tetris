@@ -16,7 +16,7 @@ public:
 	enum Rotation { Zero=0, CW=1, CCW=-1 };
 	
 	Tetromino() = delete;
-	Tetromino(const std::string & shape, sf::Vector2i start_pos, sf::Vector2f blocksize);
+	Tetromino(const std::string & shape, const sf::Color &c, sf::Vector2i start_pos, sf::Vector2f blocksize);
 	bool IsDone() const;
 	void HandleInput();
 	void Update(Grid * grid);
@@ -25,8 +25,6 @@ public:
 	void Move(Tetromino::Direction where);
 	int GetSpeed() { return m_speed; }
 	void HardDrop();
-	
-	inline static sf::Color colors[3] = { sf::Color::Red, sf::Color::Magenta, sf::Color::Blue };
 private:
 	bool lowerThan(const Shape & another) const;
 	Shape transformShape() const;

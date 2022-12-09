@@ -15,7 +15,7 @@ Grid::Grid (sf::Vector2f start_pos, sf::Vector2f size, sf::Vector2u dim) :
 	m_blocksize(sf::Vector2f{size.x/dim.x, size.y/dim.y}), m_score(0)
 {
 	m_backdrop.setPosition(m_origin);
-	m_backdrop.setFillColor(sf::Color::Black);
+	m_backdrop.setFillColor(sf::Color(0x001133ff));
 }
 
 void Grid::Update ( ) {

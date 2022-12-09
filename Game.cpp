@@ -1,6 +1,12 @@
 #include "Game.h"
 #include <SFML/Window/Event.hpp>
 
+static const std::vector<std::vector<unsigned int>> palletes{ 
+	{ 0xFFE829ff, 0xFF0F0Cff, 0xFF7800ff, 0x2C6FD2ff, 0x6AFF3Cff, 0x63145bff, 0x569fb1ff} 
+};
+
+static const std::vector<std::string> shapes = { "RUL", "URU", "RUU", "LUU", "ULU", "UUE", "UUU" } ;
+
 Game::Game() : 
 	m_window(sf::VideoMode(360.f,710.f), "tetris"), m_frametime(6.f)
 {
@@ -19,7 +25,7 @@ void Game::Run ( ) {
 }
 
 void Game::render ( ) {
-	m_window.clear(sf::Color(255,255,255,255));
+	m_window.clear(sf::Color(200,200,200,200));
 	m_grid.Draw(&m_window);
 	m_tetromino->Render(&m_window);
 	m_window.display();
@@ -72,6 +78,7 @@ Game::~Game ( ) {
 }
 
 void Game::makeNewTetromino ( ) {
-	m_tetromino = new Tetromino(shapes[rand()%7], {5,0}, m_grid.GetBlocksize());
+	int index = rand()%7;
+	m_tetromino = new Tetromino(shapes[index], sf::Color(palletes[0][index]), {5,0}, m_grid.GetBlocksize());
 }
 

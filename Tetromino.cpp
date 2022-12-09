@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-Tetromino::Tetromino (const std::string & shape, sf::Vector2i start_pos, sf::Vector2f blocksize) : 
+Tetromino::Tetromino (const std::string & shape,const sf::Color &c, sf::Vector2i start_pos, sf::Vector2f blocksize) : 
 	m_speed(1), m_thickness(4.f), m_hardrop(false), m_waitime(5),
 	m_rot(Tetromino::Rotation::Zero),
 	m_dir(Tetromino::Direction::None)
@@ -11,7 +11,7 @@ Tetromino::Tetromino (const std::string & shape, sf::Vector2i start_pos, sf::Vec
 	m_gridpos.resize(SHAPE_SIZE);
 	m_model.resize(SHAPE_SIZE);
 	
-	const sf::Color & color = colors[rand()%3];
+	const sf::Color & color = c;
 	this->setupBlock(0, color, blocksize);
 	m_gridpos[0] = start_pos;
 	

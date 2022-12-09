@@ -16,6 +16,7 @@ private:
 	void handleInput();
 	void render();
 	void clear();
+	void loadInfo();
 	
 	Tetromino *m_tetromino;
 	Grid m_grid;
