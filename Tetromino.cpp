@@ -2,10 +2,10 @@
 #include <stdexcept>
 #include <algorithm>
 
-Tetromino::Tetromino (const std::string & shape,const sf::Color &c, sf::Vector2i start_pos, sf::Vector2f blocksize) : 
+Tetromino::Tetromino (bool disable_rot, const std::string & shape,const sf::Color &c, sf::Vector2i start_pos, sf::Vector2f blocksize) : 
 	m_speed(1), m_thickness(4.f), m_hardrop(false), m_waitime(5),
-	m_rot(Tetromino::Rotation::Zero),
-	m_dir(Tetromino::Direction::None)
+	m_rot(disable_rot ? Rotation::Disabled : Rotation::Zero), 
+	m_dir(Direction::None), m_tickcount(0), m_ticklimit(5)
 {
 	const size_t SHAPE_SIZE = shape.size() + 1;
 	m_gridpos.resize(SHAPE_SIZE);
@@ -23,12 +23,14 @@ Tetromino::Tetromino (const std::string & shape,const sf::Color &c, sf::Vector2i
 		case 'U': --m_gridpos[i].y; break;
 		case 'R': ++m_gridpos[i].x; break;
 		case 'L': --m_gridpos[i].x; break;
-		case 'E': ++m_gridpos[i].x, ++m_gridpos[i].y; break;
+		case 'E': ++m_gridpos[i].x, --m_gridpos[i].y; break;
 		}
 	}
 }
 
 void Tetromino::Update (Grid * grid) {
+	m_tickcount++;
+	
 	Shape original = m_gridpos;
 	m_gridpos = grid->GetBoundedShape(this->transformShape());
 	Shape ghost = grid->GetGhostShape(m_gridpos);
@@ -39,7 +41,7 @@ void Tetromino::Update (Grid * grid) {
 	} else { m_waitime = 5; }
 	
 	m_dir = Tetromino::Direction::None;
-	m_rot = Tetromino::Rotation::Zero;
+	m_rot = (m_rot == Rotation::Disabled ? Rotation::Disabled : Rotation::Zero);
 	this->setPosition(grid);
 	
 	if (!m_waitime) { grid->AddRectangles(m_model); }
@@ -60,7 +62,7 @@ void Tetromino::setPosition (Grid * grid) {
 }
 
 void Tetromino::Rotate ( Tetromino::Rotation how ) {
-	m_rot = how;
+	m_rot = (m_rot == Rotation::Disabled ? Rotation::Disabled : how);
 }
 
 void Tetromino::Render (sf::RenderWindow * window) const {
@@ -94,10 +96,11 @@ void Tetromino::HardDrop ( ) {
 
 Shape Tetromino::transformShape ( ) const {
 	std::vector<sf::Vector2i> new_pos = m_gridpos;
-	auto origin = m_gridpos[0];
+	auto origin = m_gridpos[2];
+	auto speed = (m_tickcount%m_ticklimit==0 ? m_speed : 0);
 	
 	for(size_t i=0;i<m_gridpos.size();i++) { 
-		if (m_rot != Tetromino::Rotation::Zero) {
+		if (m_rot != Rotation::Zero and m_rot != Rotation::Disabled) {
 			new_pos[i] -= origin;
 			new_pos[i] = sf::Vector2i{ -new_pos[i].y, new_pos[i].x };
 			new_pos[i] *= (int)m_rot;
@@ -105,7 +108,7 @@ Shape Tetromino::transformShape ( ) const {
 		}
 		
 		new_pos[i].x += m_dir;
-		new_pos[i].y += m_speed;
+		new_pos[i].y += speed;
 	}
 	
 	return new_pos;

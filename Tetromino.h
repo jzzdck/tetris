@@ -13,10 +13,10 @@ using Shape = std::vector<sf::Vector2i>;
 class Tetromino {
 public:
 	enum Direction { None=0, Right=1, Left=-1 };
-	enum Rotation { Zero=0, CW=1, CCW=-1 };
+	enum Rotation { Zero=0, CW=1, CCW=-1, Disabled=2};
 	
 	Tetromino() = delete;
-	Tetromino(const std::string & shape, const sf::Color &c, sf::Vector2i start_pos, sf::Vector2f blocksize);
+	Tetromino(bool disable_rot,const std::string & shape, const sf::Color &c, sf::Vector2i start_pos, sf::Vector2f blocksize);
 	bool IsDone() const;
 	void HandleInput();
 	void Update(Grid * grid);
@@ -33,7 +33,7 @@ private:
 	
 	bool m_hardrop;
 	int m_waitime;
-	int m_speed;
+	int m_speed,m_tickcount,m_ticklimit;
 	Tetromino::Direction m_dir;
 	Tetromino::Rotation m_rot;
 	Shape m_gridpos, m_origpos;
