@@ -21,7 +21,7 @@ private:
 	
 	int m_next;
 	Scorer m_scorer;
-	Tetromino *m_tetromino, *m_preview;
+	Tetromino *m_tetromino, *m_preview, *m_ghost;
 	Grid m_grid, m_previewgrid;
 	sf::RenderWindow m_window;
 	

@@ -27,6 +27,7 @@ void Game::render ( ) {
 	m_previewgrid.Draw(&m_window);
 	m_tetromino->Render(&m_window);
 	m_preview->Render(&m_window);
+	m_ghost->Render(&m_window);
 	m_scorer.Render(&m_window);
 	m_window.display();
 }
@@ -69,6 +70,7 @@ void Game::update ( ) {
 		} 
 		
 		m_tetromino->Update(&m_grid);
+		m_ghost->GhostDrop(&m_grid,m_tetromino);
 		m_grid.Update(m_scorer.ClearedLines);
 		m_scorer.Update();
 		m_elapsed -= sf::seconds(update_ps);
@@ -81,6 +83,9 @@ Game::~Game ( ) {
 
 void Game::makeNewTetromino ( ) {
 	m_tetromino = new Tetromino(shapes[m_next], sf::Color(palletes[0][m_next]), {5,0}, m_grid.GetBlocksize());
+	m_ghost = new Tetromino(shapes[m_next], sf::Color(palletes[0][m_next]), {5,0}, m_grid.GetBlocksize());
+	m_ghost->Attenuate(0.5f);
+	
 	if (!m_next) m_tetromino->Rotate(Tetromino::Rotation::Disabled);
 	m_next = rand()%7;
 	

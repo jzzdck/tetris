@@ -33,15 +33,18 @@ void Tetromino::Update (Grid * grid) {
 	
 	Shape original = m_gridpos;
 	m_gridpos = grid->GetBoundedShape(this->transformShape());
-	Shape ghost = grid->GetGhostShape(m_gridpos);
+	m_ghost = grid->GetGhostShape(m_gridpos);
 	
-	if (m_hardrop or this->lowerThan(ghost)) {
-		m_gridpos = grid->assertValidShape(ghost) ? ghost : original;
-		m_waitime = m_hardrop ? 0 : (--m_waitime);
+	if (m_hardrop or this->lowerThan(m_ghost)) {
+		if (!grid->assertValidShape(m_ghost))
+			m_ghost = original;
+		
+		m_gridpos = m_ghost;
+		m_waitime = ( m_hardrop ? 0 : (--m_waitime) );
 	} else { m_waitime = 5; }
 	
 	m_dir = Tetromino::Direction::None;
-	m_rot = (m_rot == Rotation::Disabled ? Rotation::Disabled : Rotation::Zero);
+	if (m_rot != Rotation::Disabled) m_rot = Rotation::Zero;
 	this->setPosition(grid);
 	
 	if (!m_waitime) { grid->AddRectangles(m_model); }
@@ -97,7 +100,7 @@ void Tetromino::HardDrop ( ) {
 Shape Tetromino::transformShape ( ) const {
 	std::vector<sf::Vector2i> new_pos = m_gridpos;
 	auto origin = m_gridpos[2];
-	auto speed = (m_tickcount%m_ticklimit==0 ? m_speed : 0);
+	int speed = (m_tickcount%m_ticklimit==0);
 	
 	for(size_t i=0;i<m_gridpos.size();i++) { 
 		if (m_rot != Rotation::Zero and m_rot != Rotation::Disabled) {
@@ -127,6 +130,24 @@ bool Tetromino::lowerThan (const Shape & another) const {
 void Tetromino::Offset (const sf::Vector2f & ofs) {
 	for(size_t i=0;i<m_model.size();i++) { 
 		m_model[i].setPosition(m_model[i].getPosition() + ofs);
+	}
+}
+
+void Tetromino::GhostDrop (Grid * grid, const Tetromino * another) {
+	m_gridpos = another->m_ghost;
+	this->setPosition(grid);
+}
+
+void Tetromino::Attenuate (float alpha) {
+	auto block_color = m_model[0].getFillColor();
+	auto outline_color = m_model[0].getOutlineColor();
+	
+	block_color.a *= alpha;
+	outline_color.a *= alpha;
+	
+	for(size_t i=0;i<m_model.size();i++) { 
+		m_model[i].setFillColor(block_color);
+		m_model[i].setOutlineColor(outline_color);
 	}
 }
 

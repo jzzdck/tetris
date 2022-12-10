@@ -17,15 +17,20 @@ public:
 	
 	Tetromino() = delete;
 	Tetromino(const std::string & shape, const sf::Color &c, sf::Vector2i start_pos, sf::Vector2f blocksize);
-	bool IsDone() const;
+	
 	void HandleInput();
 	void Update(Grid * grid);
 	void Render(sf::RenderWindow * window) const;
+	
 	void Rotate(Tetromino::Rotation how);
 	void Move(Tetromino::Direction where);
 	void Offset(const sf::Vector2f & ofs);
-	int GetSpeed() { return m_speed; }
+	void GhostDrop(Grid * grid,const Tetromino * another);
 	void HardDrop();
+	void Attenuate(float alpha);
+	
+	int GetSpeed() const { return m_speed; }
+	bool IsDone() const;
 private:
 	bool lowerThan(const Shape & another) const;
 	Shape transformShape() const;
@@ -37,7 +42,7 @@ private:
 	int m_speed,m_tickcount,m_ticklimit;
 	Tetromino::Direction m_dir;
 	Tetromino::Rotation m_rot;
-	Shape m_gridpos, m_origpos;
+	Shape m_gridpos, m_ghost;
 	std::vector<sf::RectangleShape> m_model;
 	float m_thickness;
 };

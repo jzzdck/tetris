@@ -1,6 +1,4 @@
 #include "Scorer.h"
-#include <algorithm>
-#include <iostream>
 #include <sstream>
 
 Scorer::Scorer() {
