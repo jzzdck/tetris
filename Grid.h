@@ -10,7 +10,7 @@ class Grid {
 public:
 	Grid();
 	Grid(sf::Vector2f start_pos, sf::Vector2f size, sf::Vector2u dim);
-	void Update();
+	void Update(int &lines_cleared);
 	void AddRectangles(const std::vector<sf::RectangleShape> &to_add);
 	void Draw(sf::RenderWindow * window) const;
 	const sf::Vector2f & GetBlocksize();
@@ -22,7 +22,6 @@ private:
 	bool assertValidCol(const sf::Vector2i & gridpos) const;
 	void descendBlocks(int from);
 	void clearRow(int which);
-	int m_score;
 	sf::RectangleShape m_backdrop;
 	sf::Vector2i m_dims;
 	sf::Vector2f m_origin;

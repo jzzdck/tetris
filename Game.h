@@ -4,6 +4,7 @@
 #include "Grid.h"
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/System/Clock.hpp>
+#include "Scorer.h"
 
 class Game {
 public:
@@ -18,8 +19,10 @@ private:
 	void clear();
 	void loadInfo();
 	
-	Tetromino *m_tetromino;
-	Grid m_grid;
+	int m_next;
+	Scorer m_scorer;
+	Tetromino *m_tetromino, *m_preview;
+	Grid m_grid, m_previewgrid;
 	sf::RenderWindow m_window;
 	
 	sf::Clock m_clock;
@@ -31,7 +34,7 @@ private:
 	};
 	
 	const std::vector<std::string> shapes = { 
-		"RUL", "URU", "RUU", "LUU", "ULU", "ELU", "UUU"
+		"UEU", "RUR", "RRU", "LLU", "LUL", "RUE", "UUU"
 	} ;
 };
 

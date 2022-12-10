@@ -2,10 +2,10 @@
 #include <stdexcept>
 #include <algorithm>
 
-Tetromino::Tetromino (bool disable_rot, const std::string & shape,const sf::Color &c, sf::Vector2i start_pos, sf::Vector2f blocksize) : 
+Tetromino::Tetromino (const std::string & shape,const sf::Color &c, sf::Vector2i start_pos, sf::Vector2f blocksize) : 
 	m_speed(1), m_thickness(4.f), m_hardrop(false), m_waitime(5),
-	m_rot(disable_rot ? Rotation::Disabled : Rotation::Zero), 
-	m_dir(Direction::None), m_tickcount(0), m_ticklimit(5)
+	m_rot(Rotation::Zero), m_dir(Direction::None), 
+	m_tickcount(0), m_ticklimit(5)
 {
 	const size_t SHAPE_SIZE = shape.size() + 1;
 	m_gridpos.resize(SHAPE_SIZE);
@@ -23,7 +23,7 @@ Tetromino::Tetromino (bool disable_rot, const std::string & shape,const sf::Colo
 		case 'U': --m_gridpos[i].y; break;
 		case 'R': ++m_gridpos[i].x; break;
 		case 'L': --m_gridpos[i].x; break;
-		case 'E': ++m_gridpos[i].x, --m_gridpos[i].y; break;
+		case 'E': ++m_gridpos[i].x, ++m_gridpos[i].y; break;
 		}
 	}
 }
@@ -123,3 +123,10 @@ bool Tetromino::lowerThan (const Shape & another) const {
 	
 	return false;
 }
+
+void Tetromino::Offset (const sf::Vector2f & ofs) {
+	for(size_t i=0;i<m_model.size();i++) { 
+		m_model[i].setPosition(m_model[i].getPosition() + ofs);
+	}
+}
+

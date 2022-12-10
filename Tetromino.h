@@ -16,13 +16,14 @@ public:
 	enum Rotation { Zero=0, CW=1, CCW=-1, Disabled=2};
 	
 	Tetromino() = delete;
-	Tetromino(bool disable_rot,const std::string & shape, const sf::Color &c, sf::Vector2i start_pos, sf::Vector2f blocksize);
+	Tetromino(const std::string & shape, const sf::Color &c, sf::Vector2i start_pos, sf::Vector2f blocksize);
 	bool IsDone() const;
 	void HandleInput();
 	void Update(Grid * grid);
 	void Render(sf::RenderWindow * window) const;
 	void Rotate(Tetromino::Rotation how);
 	void Move(Tetromino::Direction where);
+	void Offset(const sf::Vector2f & ofs);
 	int GetSpeed() { return m_speed; }
 	void HardDrop();
 private:

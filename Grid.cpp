@@ -5,21 +5,20 @@
 #include <cstdlib>
 
 Grid::Grid() : 
-	Grid(sf::Vector2f{5.f,5.f}, sf::Vector2f{350.f,700.f}, sf::Vector2u{10,20})
+	Grid(sf::Vector2f{15.f,5.f}, sf::Vector2f{350.f,700.f}, sf::Vector2u{10,20})
 {  
-	
+
 }
 
 Grid::Grid (sf::Vector2f start_pos, sf::Vector2f size, sf::Vector2u dim) :
 	m_origin(start_pos), m_backdrop(size), m_dims(dim),
-	m_blocksize(sf::Vector2f{size.x/dim.x, size.y/dim.y}), m_score(0)
+	m_blocksize(sf::Vector2f{size.x/dim.x, size.y/dim.y})
 {
-	m_backdrop.setPosition(m_origin);
-	m_backdrop.setFillColor(sf::Color(0x001133ff));
+	m_backdrop.setPosition(sf::Vector2f{m_origin.x - 2.f, m_origin.y});
+	m_backdrop.setFillColor(sf::Color(0x000000ff));
 }
 
-void Grid::Update ( ) {
-	int lines_cleared = 0;
+void Grid::Update ( int &lines_cleared ) {
 	for(int i=0;i<m_dims.y;i++) { 
 		float y_pos = GetPosition({0,i}).y;
 		int cols_occupied = std::count_if(m_occupied.begin(),m_occupied.end(),
@@ -32,10 +31,6 @@ void Grid::Update ( ) {
 			this->descendBlocks(i-1);
 		}
 	}
-	
-	int prev_score = m_score;
-	m_score += lines_cleared * lines_cleared * 17 * 13;
-	if (m_score != prev_score) std::cout << "SCORE: " << m_score << std::endl;
 }
 
 void Grid::Draw (sf::RenderWindow * window) const {
